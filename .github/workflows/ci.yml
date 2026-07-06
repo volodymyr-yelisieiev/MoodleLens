@@ -1,0 +1,37 @@
+name: CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install verification tools
+        run: |
+          if ! command -v rg >/dev/null 2>&1; then
+            HOMEBREW_NO_REQUIRE_TAP_TRUST=1 brew install ripgrep
+          fi
+
+      - name: Run tests
+        run: |
+          xcodebuild test \
+            -project MoodleLens.xcodeproj \
+            -scheme MoodleLens \
+            -destination 'platform=macOS' \
+            -parallel-testing-enabled NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      - name: Run local verification
+        run: scripts/verify-local.sh

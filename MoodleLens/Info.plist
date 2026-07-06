@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>MoodleLens</string>
+	<key>CFBundleExecutable</key>
+	<string>MoodleLens</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.github.volodymyryelisieiev.moodlelens</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>MoodleLens</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>MoodleLens can read compact Moodle page context from the frontmost supported browser when you explicitly grant Browser Context in Settings.</string>
+	<key>NSApplicationCrashOnExceptions</key>
+	<false/>
+	<key>NSApplicationSleepDisabled</key>
+	<true/>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSRequiresAquaSystemAppearance</key>
+	<false/>
+	<key>NSScreenCaptureUsageDescription</key>
+	<string>MoodleLens needs screen capture access to analyze the current Moodle assessment page.</string>
+	<key>NSSupportsAutomaticTermination</key>
+	<false/>
+	<key>NSSupportsSuddenTermination</key>
+	<true/>
+	<key>SUEnableAutomaticChecks</key>
+	<false/>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/volodymyr-yelisieiev/MoodleLens/main/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>ncVWSVmwQWBkrf6WhIZsbVexuaPOJ8N6tfGH9TPO5Yw=</string>
+</dict>
+</plist>
