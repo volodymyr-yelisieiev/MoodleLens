@@ -12,13 +12,16 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: macos-15
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.0
 
-      - name: Show Xcode version
-        run: xcodebuild -version
+      - name: Show build environment
+        run: |
+          sw_vers
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i macos
 
       - name: Install verification tools
         run: |

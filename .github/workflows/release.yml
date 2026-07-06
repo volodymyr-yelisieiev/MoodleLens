@@ -11,7 +11,7 @@ permissions:
 jobs:
   release:
     name: Release
-    runs-on: macos-15
+    runs-on: macos-latest
 
     steps:
       - name: Checkout
@@ -19,8 +19,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Show Xcode version
-        run: xcodebuild -version
+      - name: Show build environment
+        run: |
+          sw_vers
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i macos
 
       - name: Import signing certificate
         env:
