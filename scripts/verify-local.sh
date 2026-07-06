@@ -142,7 +142,7 @@ check "Package script styles Finder DMG window" sh -c "rg -q 'set background col
 check "Package script no longer creates old macos ZIP" sh -c '! rg -q "macos\\.zip" scripts/package-share.sh'
 check "Package script uses active Xcode developer dir" sh -c "rg -q 'xcode-select -p' scripts/package-share.sh && ! rg -q '/Applications/Xcode\\.app/Contents/Developer' scripts/package-share.sh"
 check "Package script supports direct notary credentials" sh -c "rg -q 'MOODLELENS_NOTARY_KEY' scripts/package-share.sh && rg -q 'notarytool submit .*--key' scripts/package-share.sh"
-check "Release workflow opens appcast PR after uploading assets" sh -c "awk '/Create Release/ { create = NR } /Open appcast pull request/ { appcast = NR } END { exit !(create && appcast && create < appcast) }' .github/workflows/release.yml && rg -q 'gh pr create' .github/workflows/release.yml"
+check "Release workflow publishes appcast as release asset" sh -c "rg -q 'tags:' .github/workflows/release.yml && rg -q 'dist/appcast.xml' .github/workflows/release.yml && ! rg -q 'gh pr create|Open appcast pull request' .github/workflows/release.yml"
 check "Appcast generation script signs Sparkle feed" sh -c "rg -q 'generate_appcast' scripts/generate-appcast.sh && rg -q 'SPARKLE_PRIVATE_KEY' scripts/generate-appcast.sh && rg -q 'download-url-prefix' scripts/generate-appcast.sh"
 check "No old product names remain" sh -c "old_names='Ghost''Cue|Hidden''AI|Moodle Assessment'' Probe|in''searcher|hidden''ai|ghost''cue'; ! rg -n -i \"\$old_names\" --glob '!scripts/verify-local.sh' ."
 check "No old release versions remain" sh -c "old_versions='v1\\.4''\\.8|1\\.4''\\.8|104''08|v1\\.1''\\.0'; ! rg -n \"\$old_versions\" --glob '!scripts/verify-local.sh' ."

@@ -1,26 +1,24 @@
 name: Release
 
+on:
+  push:
+    tags:
+      - "v*"
+
 permissions:
   contents: write
-  pull-requests: write
-
-on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version (e.g., v1.0.0)'
-        required: true
-        default: 'v1.0.0'
 
 jobs:
   release:
+    name: Release
     runs-on: macos-15
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.0
         with:
           fetch-depth: 0
-      
+
       - name: Show Xcode version
         run: xcodebuild -version
 
@@ -63,30 +61,22 @@ jobs:
 
       - name: Run local verification
         run: scripts/verify-local.sh
-      
-      - name: Generate Changelog
-        id: changelog
+
+      - name: Generate changelog
         run: |
-          # Get the latest tag, if any
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          
-          # If no previous tag exists, use the first commit
-          if [ -z "$LATEST_TAG" ]; then
-            LATEST_TAG=$(git rev-list --max-parents=0 HEAD)
+          CURRENT_TAG="${GITHUB_REF_NAME}"
+          PREVIOUS_TAG="$(git tag --sort=-creatordate | grep -v "^${CURRENT_TAG}$" | head -n 1 || true)"
+          if [ -n "$PREVIOUS_TAG" ]; then
+            RANGE="${PREVIOUS_TAG}..HEAD"
+          else
+            RANGE="$(git rev-list --max-parents=0 HEAD)..HEAD"
           fi
-          
-          # Generate changelog from commits since the latest tag
-          CHANGELOG=$(git log --pretty=format:"- %s" $LATEST_TAG..HEAD)
-          
-          # If no commits since last tag, add a default message
-          if [ -z "$CHANGELOG" ]; then
-            CHANGELOG="- Maintenance release"
+          git log --pretty=format:"- %s" "$RANGE" > changelog.md
+          if [ ! -s changelog.md ]; then
+            echo "- Maintenance release" > changelog.md
           fi
-          
-          # Save changelog to a file
-          echo "$CHANGELOG" > changelog.md
-      
-      - name: Build DMG
+
+      - name: Build release artifacts
         env:
           MOODLELENS_SIGN_IDENTITY: ${{ secrets.MOODLELENS_SIGN_IDENTITY }}
           MOODLELENS_NOTARY_PROFILE: ${{ secrets.MOODLELENS_NOTARY_PROFILE }}
@@ -95,55 +85,30 @@ jobs:
           MOODLELENS_NOTARY_ISSUER: ${{ secrets.MOODLELENS_NOTARY_ISSUER }}
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
-          scripts/package-share.sh "${{ github.event.inputs.version }}"
-          hdiutil verify "dist/MoodleLens-${{ github.event.inputs.version }}-macos.dmg"
+          VERSION="${GITHUB_REF_NAME}"
+          scripts/package-share.sh "$VERSION"
+          hdiutil verify "dist/MoodleLens-${VERSION}-macos.dmg"
           if [ -z "${SPARKLE_PRIVATE_KEY}" ]; then
             echo "SPARKLE_PRIVATE_KEY secret is required to publish in-app updates." >&2
             exit 1
           fi
-          scripts/generate-appcast.sh "${{ github.event.inputs.version }}"
+          scripts/generate-appcast.sh "$VERSION"
           if [ -z "${MOODLELENS_SIGN_IDENTITY}${MOODLELENS_NOTARY_PROFILE}" ]; then
             printf '\n\nNote: this DMG is ad-hoc signed and not notarized. macOS may require Control-click -> Open on first launch, and Privacy permissions may need a fresh grant after each rebuilt app.\n' >> changelog.md
           elif [ -z "${MOODLELENS_NOTARY_PROFILE}${MOODLELENS_NOTARY_KEY}" ]; then
             printf '\n\nNote: this DMG is signed but not notarized. Privacy permissions should persist across updates with the same signing identity, but public Gatekeeper UX still requires notarization.\n' >> changelog.md
           fi
           printf '\n\nNative Sparkle updates are available from this release onward.\n' >> changelog.md
-      
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v3
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v3.0.1
         with:
-          tag_name: ${{ github.event.inputs.version }}
-          name: MoodleLens ${{ github.event.inputs.version }}
+          tag_name: ${{ github.ref_name }}
+          name: MoodleLens ${{ github.ref_name }}
           body_path: changelog.md
           draft: false
           prerelease: false
           files: |
-            dist/MoodleLens-${{ github.event.inputs.version }}-macos.dmg
-            dist/MoodleLens-${{ github.event.inputs.version }}-sparkle.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Open appcast pull request
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add appcast.xml
-          if ! git diff --cached --quiet; then
-            BRANCH="release/${{ github.event.inputs.version }}-appcast"
-            git switch -c "$BRANCH"
-            git commit -m "Update appcast for ${{ github.event.inputs.version }}"
-            git push --force-with-lease origin "$BRANCH"
-            PR_URL="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --state open --json url --jq '.[0].url // ""')"
-            if [ -z "$PR_URL" ]; then
-              PR_URL="$(gh pr create \
-                --repo "$GITHUB_REPOSITORY" \
-                --base main \
-                --head "$BRANCH" \
-                --title "Update appcast for ${{ github.event.inputs.version }}" \
-                --body "Generated from the published ${{ github.event.inputs.version }} Sparkle ZIP.")"
-            fi
-            echo "Appcast pull request: $PR_URL"
-          fi
+            dist/MoodleLens-${{ github.ref_name }}-macos.dmg
+            dist/MoodleLens-${{ github.ref_name }}-sparkle.zip
+            dist/appcast.xml

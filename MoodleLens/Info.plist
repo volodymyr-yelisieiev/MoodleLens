@@ -39,8 +39,8 @@
 	<key>SUEnableAutomaticChecks</key>
 	<false/>
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/volodymyr-yelisieiev/MoodleLens/main/appcast.xml</string>
+	<string>https://github.com/volodymyr-yelisieiev/MoodleLens/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>ncVWSVmwQWBkrf6WhIZsbVexuaPOJ8N6tfGH9TPO5Yw=</string>
+	<string>HzO0XyC+4CdU6L2+iydEa9tz2fINvTFGcYOg43dVIis=</string>
 </dict>
 </plist>

@@ -7,7 +7,7 @@ cd "$ROOT"
 VERSION="${1:?Usage: scripts/generate-appcast.sh <version>}"
 ZIP_PATH="$ROOT/dist/MoodleLens-$VERSION-sparkle.zip"
 APPCAST_DIR="$ROOT/dist/appcast"
-APPCAST_PATH="$ROOT/appcast.xml"
+APPCAST_PATH="$ROOT/dist/appcast.xml"
 DOWNLOAD_URL_PREFIX="${MOODLELENS_DOWNLOAD_URL_PREFIX:-https://github.com/volodymyr-yelisieiev/MoodleLens/releases/download/$VERSION/}"
 SPARKLE_ACCOUNT="${SPARKLE_ACCOUNT:-moodlelens-volodymyr-yelisieiev}"
 
