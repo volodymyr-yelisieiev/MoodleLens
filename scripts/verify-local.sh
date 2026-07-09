@@ -138,7 +138,7 @@ check "Package script Gatekeeper-assesses notarized app" rg -q "spctl --assess -
 check "Package script Gatekeeper-assesses notarized DMG" rg -q "context:primary-signature" scripts/package-share.sh
 check "Package script creates Sparkle app-only ZIP" rg -q 'ditto .*"\$APP_DST" "\$SPARKLE_ZIP_PATH"' scripts/package-share.sh
 check "Package script keeps DMG root to app and Applications" sh -c '! rg -q "START_HERE" scripts/package-share.sh && rg -qF "ln -s /Applications \"\$STAGE_DIR/Applications\"" scripts/package-share.sh'
-check "Package script styles Finder DMG window" sh -c "rg -q 'set background color' scripts/package-share.sh && rg -q 'set position of item' scripts/package-share.sh"
+check "Package script styles Finder DMG window" sh -c "rg -q 'set background picture' scripts/package-share.sh && rg -q 'set position of item' scripts/package-share.sh"
 check "Package script no longer creates old macos ZIP" sh -c '! rg -q "macos\\.zip" scripts/package-share.sh'
 check "Package script uses active Xcode developer dir" sh -c "rg -q 'xcode-select -p' scripts/package-share.sh && ! rg -q '/Applications/Xcode\\.app/Contents/Developer' scripts/package-share.sh"
 check "Package script supports direct notary credentials" sh -c "rg -q 'MOODLELENS_NOTARY_KEY' scripts/package-share.sh && rg -q 'notarytool submit .*--key' scripts/package-share.sh"

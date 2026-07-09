@@ -23,6 +23,7 @@ APP_DST="$STAGE_DIR/$APP_NAME.app"
 DMG_PATH="$DIST_DIR/$ARTIFACT_NAME-$VERSION-macos.dmg"
 DMG_TEMP_PATH="$WORK_DIR/$ARTIFACT_NAME-$VERSION-macos-rw.dmg"
 DMG_MOUNT="$WORK_DIR/dmg-mount"
+DMG_BACKGROUND="$ROOT/assets/dmg-background.png"
 SPARKLE_ZIP_PATH="$DIST_DIR/$ARTIFACT_NAME-$VERSION-sparkle.zip"
 SIGN_IDENTITY="${MOODLELENS_SIGN_IDENTITY:-}"
 NOTARY_PROFILE="${MOODLELENS_NOTARY_PROFILE:-}"
@@ -82,6 +83,7 @@ trap cleanup EXIT
 style_dmg() {
   osascript <<APPLESCRIPT
 set dmgFolder to POSIX file "$DMG_MOUNT" as alias
+set backgroundImage to POSIX file "$DMG_MOUNT/.background/dmg-background.png" as alias
 tell application "Finder"
   open dmgFolder
   set current view of container window of dmgFolder to icon view
@@ -91,9 +93,9 @@ tell application "Finder"
   set viewOptions to the icon view options of container window of dmgFolder
   set arrangement of viewOptions to not arranged
   set icon size of viewOptions to 96
-  set background color of viewOptions to {62720, 64250, 65535}
-  set position of item "MoodleLens.app" of dmgFolder to {170, 200}
-  set position of item "Applications" of dmgFolder to {470, 200}
+  set background picture of viewOptions to backgroundImage
+  set position of item "MoodleLens.app" of dmgFolder to {170, 190}
+  set position of item "Applications" of dmgFolder to {470, 190}
   update dmgFolder without registering applications
   delay 1
   close container window of dmgFolder
@@ -121,6 +123,8 @@ fi
 codesign --verify --deep --strict "$APP_DST"
 
 ln -s /Applications "$STAGE_DIR/Applications"
+mkdir -p "$STAGE_DIR/.background"
+cp "$DMG_BACKGROUND" "$STAGE_DIR/.background/dmg-background.png"
 
 rm -f "$DMG_PATH" "$DMG_TEMP_PATH" "$SPARKLE_ZIP_PATH"
 ditto -c -k --norsrc --noextattr --keepParent "$APP_DST" "$SPARKLE_ZIP_PATH"
