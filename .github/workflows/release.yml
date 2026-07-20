@@ -104,7 +104,7 @@ jobs:
           printf '\n\nNative Sparkle updates are available from this release onward.\n' >> changelog.md
 
       - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v3.0.1
+        uses: softprops/action-gh-release@v3.0.2
         with:
           tag_name: ${{ github.ref_name }}
           name: MoodleLens ${{ github.ref_name }}
